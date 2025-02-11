@@ -5,7 +5,6 @@ import { createClient } from "@/supabase/client";
 
 const HomePage = () => {
   const router = useRouter();
-  const [tickets, setTickets] = useState<any[]>([]);
   const [from, setFromCity] = useState<string>("");
   const [to, setToCity] = useState<string>("");
   const [date, setDate] = useState<string>("");
@@ -29,7 +28,6 @@ const HomePage = () => {
 
     if (data) {
       localStorage.setItem("selectedTicket", JSON.stringify(data));
-      setTickets(data);
       router.push("/byticket");
       setFromCity("");
       setToCity("");
@@ -104,6 +102,7 @@ const HomePage = () => {
           >
             Chipta izlash
           </button>
+          
         </div>
       </div>
     </div>
