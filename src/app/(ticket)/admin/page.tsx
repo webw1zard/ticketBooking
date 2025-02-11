@@ -1,31 +1,60 @@
 "use client";
 import { createClient } from "@/supabase/client";
-import React, {useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const AdminPage = () => {
-    fetchTickets();
+interface Ticket {
+  id: number;
+  from: string;
+  to: string;
+  price: string;
+  count: string;
+  time: string;
+  date: string;
+}
 
-  const [tickets, setTickets] = useState<any>([]);
-  const [from, setFromCity] = useState<string>("");
-  const [to, setToCity] = useState<string>("");
-  const [price, setPrice] = useState<string>("");
-  const [count, setCount] = useState<string>("");
-  const [time, setTime] = useState<string>("");
-  const [date, setDate] = useState<string>("");
-  const [editingTicket, setEditingTicket] = useState<string | null>(null);
-  const supabase= createClient();
+interface AdminPageState {
+  tickets: Ticket[];
+  from: string;
+  to: string;
+  price: string;
+  count: string;
+  time: string;
+  date: string;
+  editingTicket: Ticket | null;
+}
+
+const AdminPage: React.FC = () => {
+  const [state, setState] = useState<AdminPageState>({
+    tickets: [],
+    from: "",
+    to: "",
+    price: "",
+    count: "",
+    time: "",
+    date: "",
+    editingTicket: null,
+  });
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
+
   async function fetchTickets() {
     const { data, error } = await supabase.from("AvtoTicket").select("*");
     if (error) {
       console.error("Error fetching tickets:", error);
     } else {
-      setTickets(data);
+      setState((prev) => ({ ...prev, tickets: data }));
     }
   }
 
   const createTicket = async () => {
+    const { from, to, price, count, time, date, editingTicket } = state;
+
     if (!from || !to || !price || !count || !time || !date) {
       toast.error("Iltimos, barcha maydonlarni to'ldiring.");
       return;
@@ -40,13 +69,12 @@ const AdminPage = () => {
       const { error } = await supabase
         .from("AvtoTicket")
         .update({ from, to, price, count, time, date })
-        // @ts-expect-error
         .eq("id", editingTicket.id);
 
       if (error) {
         console.error("Update error:", error);
       } else {
-        setEditingTicket(null);
+        setState((prev) => ({ ...prev, editingTicket: null }));
         fetchTickets();
       }
     } else {
@@ -63,22 +91,29 @@ const AdminPage = () => {
       }
     }
 
-    setFromCity("");
-    setToCity("");
-    setPrice("");
-    setCount("");
-    setTime("");
-    setDate("");
+    // Reset fields
+    setState((prev) => ({
+      ...prev,
+      from: "",
+      to: "",
+      price: "",
+      count: "",
+      time: "",
+      date: "",
+    }));
   };
 
-  function editTicket(ticket:any) {
-    setEditingTicket(ticket);
-    setFromCity(ticket.from);
-    setToCity(ticket.to);
-    setPrice(ticket.price);
-    setCount(ticket.count);
-    setTime(ticket.time);
-    setDate(ticket.date);
+  function editTicket(ticket: Ticket) {
+    setState((prev) => ({
+      ...prev,
+      editingTicket: ticket,
+      from: ticket.from,
+      to: ticket.to,
+      price: ticket.price,
+      count: ticket.count,
+      time: ticket.time,
+      date: ticket.date,
+    }));
   }
 
   async function deleteTicket(id: number) {
@@ -114,31 +149,39 @@ const AdminPage = () => {
         <div className="bg-gray-800 mt-5 w-full max-w-lg p-8 rounded-2xl shadow-2xl">
           <div className="space-y-4">
             <select
-              value={from}
-              onChange={(e) => setFromCity(e.target.value)}
+              value={state.from}
+              onChange={(e) => setState((prev) => ({ ...prev, from: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
-              <option value="" disabled>Qayerdan</option>
+              <option value="" disabled>
+                Qayerdan
+              </option>
               {["Toshkent", "Buxoro", "Farg'ona", "Xorazm", "Surxondaryo", "Jizzax", "Samarqand", "Navoiy", "Qashqadaryo", "Andijon", "Namangan", "Qoraqalpog'iston"].map((city) => (
-                <option key={city} value={city}>{city}</option>
+                <option key={city} value={city}>
+                  {city}
+                </option>
               ))}
             </select>
             <select
-              value={to}
-              onChange={(e) => setToCity(e.target.value)}
+              value={state.to}
+              onChange={(e) => setState((prev) => ({ ...prev, to: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
-              <option value="" disabled>Qayerga</option>
+              <option value="" disabled>
+                Qayerga
+              </option>
               {["Toshkent", "Buxoro", "Farg'ona", "Xorazm", "Surxondaryo", "Jizzax", "Samarqand", "Navoiy", "Qashqadaryo", "Andijon", "Namangan", "Qoraqalpog'iston"].map((city) => (
-                <option key={city} value={city}>{city}</option>
+                <option key={city} value={city}>
+                  {city}
+                </option>
               ))}
             </select>
 
             <input
               type="text"
               placeholder="Puli"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
+              value={state.price}
+              onChange={(e) => setState((prev) => ({ ...prev, price: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
@@ -146,26 +189,30 @@ const AdminPage = () => {
               type="number"
               min={1}
               placeholder="Nechta chipta"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
+              value={state.count}
+              onChange={(e) => setState((prev) => ({ ...prev, count: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
             <select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
+              value={state.time}
+              onChange={(e) => setState((prev) => ({ ...prev, time: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
-              <option value="" disabled>Vaqt</option>
+              <option value="" disabled>
+                Vaqt
+              </option>
               {["20:00", "21:00", "22:00", "22:30", "23:00", "23:30"].map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t}>
+                  {t}
+                </option>
               ))}
             </select>
 
             <input
               type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
+              value={state.date}
+              onChange={(e) => setState((prev) => ({ ...prev, date: e.target.value }))}
               className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
@@ -180,18 +227,26 @@ const AdminPage = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-7xl mx-auto mt-8">
-        {tickets.map((ticket: any) => (
+        {state.tickets.map((ticket: Ticket) => (
           <div
             key={ticket.id}
             className="bg-red-400 text-white rounded-2xl shadow-xl p-6 transform transition duration-300 hover:scale-105"
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold">{ticket.from} - {ticket.to}</h2>
-              <span className="text-lg">{ticket.date} <br /> {ticket.time}</span>
+              <h2 className="text-2xl font-semibold">
+                {ticket.from} - {ticket.to}
+              </h2>
+              <span className="text-lg">
+                {ticket.date} <br /> {ticket.time}
+              </span>
             </div>
             <div className="flex justify-between items-center mb-4">
-              <p className="text-lg">Puli: <span className="font-bold">{ticket.price} so'm</span></p>
-              <p className="text-lg">Count: <span className="font-bold">{ticket.count}</span></p>
+              <p className="text-lg">
+                Puli: <span className="font-bold">{ticket.price} som</span>
+              </p>
+              <p className="text-lg">
+                Count: <span className="font-bold">{ticket.count}</span>
+              </p>
             </div>
             <div className="border-t border-gray-500 pt-4">
               <button
