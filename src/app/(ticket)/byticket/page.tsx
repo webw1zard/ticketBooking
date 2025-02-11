@@ -30,10 +30,6 @@ const BuyTicketPage = () => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const supabase = createClient();
 
-    const ticketData = localStorage.getItem("selectedTicket");
-    if (ticketData) {
-      setSelectedTicket(JSON.parse(ticketData));
-    }
 
   const handleBuyClick = (ticketId: number) => {
     setSelectedId(ticketId);
