@@ -23,9 +23,7 @@ const AdminPage: React.FC = () => {
   const [date, setDate] = useState<string>("");
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null);
   const supabase = createClient()
-  useEffect(() => {
     fetchTickets();
-  }, []);
 
   async function fetchTickets() {
     const { data, error } = await supabase.from("AvtoTicket").select("*");
