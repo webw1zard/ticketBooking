@@ -8,13 +8,13 @@ const AdminPage = () => {
     fetchTickets();
 
   const [tickets, setTickets] = useState<any>([]);
-  const [from, setFromCity] = useState("");
-  const [to, setToCity] = useState("");
-  const [price, setPrice] = useState("");
-  const [count, setCount] = useState("");
-  const [time, setTime] = useState("");
-  const [date, setDate] = useState("");
-  const [editingTicket, setEditingTicket] = useState<any>(null);
+  const [from, setFromCity] = useState<string>("");
+  const [to, setToCity] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+  const [count, setCount] = useState<string>("");
+  const [time, setTime] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [editingTicket, setEditingTicket] = useState<string | null>(null);
   const supabase= createClient();
   async function fetchTickets() {
     const { data, error } = await supabase.from("AvtoTicket").select("*");
@@ -40,6 +40,7 @@ const AdminPage = () => {
       const { data, error } = await supabase
         .from("AvtoTicket")
         .update({ from, to, price, count, time, date })
+        // @ts-ignore
         .eq("id", editingTicket.id);
 
       if (error) {
