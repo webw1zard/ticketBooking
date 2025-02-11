@@ -37,10 +37,10 @@ const AdminPage = () => {
     }
 
     if (editingTicket) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("AvtoTicket")
         .update({ from, to, price, count, time, date })
-        // @ts-ignore
+        // @ts-expect-error
         .eq("id", editingTicket.id);
 
       if (error) {
@@ -50,7 +50,7 @@ const AdminPage = () => {
         fetchTickets();
       }
     } else {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("AvtoTicket")
         .insert([{ from, to, price, count, time, date }]);
 
@@ -71,7 +71,7 @@ const AdminPage = () => {
     setDate("");
   };
 
-  function editTicket(ticket: any) {
+  function editTicket(ticket:any) {
     setEditingTicket(ticket);
     setFromCity(ticket.from);
     setToCity(ticket.to);
