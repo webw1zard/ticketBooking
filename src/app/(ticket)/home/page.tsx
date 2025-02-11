@@ -14,17 +14,13 @@ const HomePage = () => {
       alert("Iltimos, barcha maydonlarni to‘ldiring!");
       return;
     }
-    const { data, error }: { data: any[] | null; error: any } = await supabase
+    const { data } = await supabase
       .from("AvtoTicket")
       .select("*")
       .eq("from", from)
       .eq("to", to)
       .eq("date", date);
 
-    if (error) {
-      console.error("Xatolik:", error.message);
-      return;
-    }
 
     if (data) {
       localStorage.setItem("selectedTicket", JSON.stringify(data));
