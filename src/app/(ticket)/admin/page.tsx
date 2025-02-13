@@ -101,14 +101,14 @@ const AdminPage = () => {
             className="text-white text-3xl font-bold hover:cursor-pointer"
             onClick={() => (location.href = "/home")}
           >
-            <span className="text-red-600">My</span>Logo
+            <span className="text-red-600">TICKET</span>BOOKING
           </div>
           <div>
             <button
               onClick={() => (location.href = "/admin")}
               className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-2 rounded-full shadow-lg hover:bg-gradient-to-r hover:from-pink-600 hover:to-red-600 transition duration-300"
             >
-              Admin Page
+              Admin
             </button>
           </div>
         </div>
@@ -126,7 +126,7 @@ const AdminPage = () => {
               className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
               <option value="" disabled>
-                Qayerdan
+                From
               </option>
               {[
                 "Toshkent",
