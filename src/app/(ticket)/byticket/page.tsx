@@ -87,6 +87,7 @@ const BuyTicketPage = () => {
     }
 
     setShowForm(false);
+    setSelectedTicket(selectedTicket.map((t) => (t.id === selectedId ? { ...t, count: newCount } : t)));
     setBuyerInfo({ name: "", lastname: "", email: "", ticketCount: 1 });
   };
 
