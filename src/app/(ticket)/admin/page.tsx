@@ -1,60 +1,32 @@
 "use client";
-import { createClient } from "@/supabase/client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { createClient } from "@/supabase/client";
 
-interface Ticket {
-  id: number;
-  from: string;
-  to: string;
-  price: string;
-  count: string;
-  time: string;
-  date: string;
-}
-
-interface AdminPageState {
-  tickets: Ticket[];
-  from: string;
-  to: string;
-  price: string;
-  count: string;
-  time: string;
-  date: string;
-  editingTicket: Ticket | null;
-}
-
-const AdminPage: React.FC = () => {
-  const [state, setState] = useState<AdminPageState>({
-    tickets: [],
-    from: "",
-    to: "",
-    price: "",
-    count: "",
-    time: "",
-    date: "",
-    editingTicket: null,
-  });
-
+const AdminPage = () => {
+  const [tickets, setTickets] = useState<Array<any>>([]);
+  const [from, setFromCity] = useState<string>("");
+  const [to, setToCity] = useState<string>("");
+  const [price, setPrice] = useState<string>("");
+  const [count, setCount] = useState<string>("");
+  const [time, setTime] = useState<string>("");
+  const [date, setDate] = useState<string>("");
+  const [editingTicket, setEditingTicket] = useState<any | null>(null);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  async function fetchTickets() {
+  const fetchTickets = async () => {
     const { data, error } = await supabase.from("AvtoTicket").select("*");
     if (error) {
       console.error("Error fetching tickets:", error);
     } else {
-      setState((prev) => ({ ...prev, tickets: data }));
+      setTickets(data);
     }
-  }
+  };
+
+  fetchTickets();
 
   const createTicket = async () => {
-    const { from, to, price, count, time, date, editingTicket } = state;
-
     if (!from || !to || !price || !count || !time || !date) {
       toast.error("Iltimos, barcha maydonlarni to'ldiring.");
       return;
@@ -66,7 +38,7 @@ const AdminPage: React.FC = () => {
     }
 
     if (editingTicket) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("AvtoTicket")
         .update({ from, to, price, count, time, date })
         .eq("id", editingTicket.id);
@@ -74,11 +46,12 @@ const AdminPage: React.FC = () => {
       if (error) {
         console.error("Update error:", error);
       } else {
-        setState((prev) => ({ ...prev, editingTicket: null }));
+        setEditingTicket(null);
         fetchTickets();
+        toast.success("Ticket muvaffaqiyatli tahrirlandi! 🎉");
       }
     } else {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("AvtoTicket")
         .insert([{ from, to, price, count, time, date }]);
 
@@ -91,29 +64,22 @@ const AdminPage: React.FC = () => {
       }
     }
 
-    // Reset fields
-    setState((prev) => ({
-      ...prev,
-      from: "",
-      to: "",
-      price: "",
-      count: "",
-      time: "",
-      date: "",
-    }));
+    setFromCity("");
+    setToCity("");
+    setPrice("");
+    setCount("");
+    setTime("");
+    setDate("");
   };
 
-  function editTicket(ticket: Ticket) {
-    setState((prev) => ({
-      ...prev,
-      editingTicket: ticket,
-      from: ticket.from,
-      to: ticket.to,
-      price: ticket.price,
-      count: ticket.count,
-      time: ticket.time,
-      date: ticket.date,
-    }));
+  function editTicket(ticket: any) {
+    setEditingTicket(ticket);
+    setFromCity(ticket.from);
+    setToCity(ticket.to);
+    setPrice(ticket.price);
+    setCount(ticket.count);
+    setTime(ticket.time);
+    setDate(ticket.date);
   }
 
   async function deleteTicket(id: number) {
@@ -122,55 +88,87 @@ const AdminPage: React.FC = () => {
       console.error("Delete error:", error);
     } else {
       fetchTickets();
+      toast.success("Ticket muvaffaqiyatli o'chirildi! 🎉");
     }
   }
 
   return (
-    <div className="bg-gradient-to-b from-blue-500 to-blue-900 min-h-screen">
+    <div>
       <ToastContainer />
-      <nav className="bg-gray-900 p-4 shadow-lg fixed w-full top-0 z-50">
+      <nav className="bg-gradient-to-r from-gray-800 via-gray-900 to-black p-3 shadow-lg fixed w-full top-0 left-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div
-            className="text-white text-3xl font-bold cursor-pointer"
+            className="text-white text-3xl font-bold hover:cursor-pointer"
             onClick={() => (location.href = "/home")}
           >
-            <span className="text-blue-500">TICKET</span>BOOKING
+            <span className="text-red-600">My</span>Logo
           </div>
-          <button
-            onClick={() => (location.href = "/admin")}
-            className="bg-gradient-to-r from-black to-pink-900 text-white px-6 py-2 rounded-full shadow-lg hover:from-pink-500 hover:to-red-500 transition duration-300"
-          >
-            Admin Page
-          </button>
+          <div>
+            <button
+              onClick={() => (location.href = "/admin")}
+              className="bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-2 rounded-full shadow-lg hover:bg-gradient-to-r hover:from-pink-600 hover:to-red-600 transition duration-300"
+            >
+              Admin Page
+            </button>
+          </div>
         </div>
       </nav>
 
-      <div className="flex items-center justify-center mt-20">
-        <div className="bg-gray-800 mt-5 w-full max-w-lg p-8 rounded-2xl shadow-2xl">
-          <div className="space-y-4">
+      <div className="h-screen w-full mt-10 pt-20 p-4 flex items-center justify-center bg-gradient-to-b from-gray-900 to-gray-700">
+        <div className="bg-black w-full max-w-lg p-8 rounded-3xl shadow-2xl">
+          <h1 className="text-4xl font-bold text-center text-white mb-6">
+            Admin Panel
+          </h1>
+          <div className="space-y-6">
             <select
-              value={state.from}
-              onChange={(e) => setState((prev) => ({ ...prev, from: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              value={from}
+              onChange={(e) => setFromCity(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
               <option value="" disabled>
                 Qayerdan
               </option>
-              {["Toshkent", "Buxoro", "Farg'ona", "Xorazm", "Surxondaryo", "Jizzax", "Samarqand", "Navoiy", "Qashqadaryo", "Andijon", "Namangan", "Qoraqalpog'iston"].map((city) => (
+              {[
+                "Toshkent",
+                "Buxoro",
+                "Farg'ona",
+                "Xorazm",
+                "Surxondaryo",
+                "Jizzax",
+                "Samarqand",
+                "Navoiy",
+                "Qashqadaryo",
+                "Andijon",
+                "Namangan",
+                "Qoraqalpog'iston",
+              ].map((city) => (
                 <option key={city} value={city}>
                   {city}
                 </option>
               ))}
             </select>
             <select
-              value={state.to}
-              onChange={(e) => setState((prev) => ({ ...prev, to: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              value={to}
+              onChange={(e) => setToCity(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
               <option value="" disabled>
                 Qayerga
               </option>
-              {["Toshkent", "Buxoro", "Farg'ona", "Xorazm", "Surxondaryo", "Jizzax", "Samarqand", "Navoiy", "Qashqadaryo", "Andijon", "Namangan", "Qoraqalpog'iston"].map((city) => (
+              {[
+                "Toshkent",
+                "Buxoro",
+                "Farg'ona",
+                "Xorazm",
+                "Surxondaryo",
+                "Jizzax",
+                "Samarqand",
+                "Navoiy",
+                "Qashqadaryo",
+                "Andijon",
+                "Namangan",
+                "Qoraqalpog'iston",
+              ].map((city) => (
                 <option key={city} value={city}>
                   {city}
                 </option>
@@ -180,45 +178,50 @@ const AdminPage: React.FC = () => {
             <input
               type="text"
               placeholder="Puli"
-              value={state.price}
-              onChange={(e) => setState((prev) => ({ ...prev, price: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
             <input
               type="number"
-              min={1}
+              min={25}
+              max={51}
               placeholder="Nechta chipta"
-              value={state.count}
-              onChange={(e) => setState((prev) => ({ ...prev, count: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              value={count}
+              onChange={(e) => setCount(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
             <select
-              value={state.time}
-              onChange={(e) => setState((prev) => ({ ...prev, time: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             >
               <option value="" disabled>
                 Vaqt
               </option>
-              {["20:00", "21:00", "22:00", "22:30", "23:00", "23:30"].map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
+              {["20:00", "21:00", "22:00", "22:30", "23:00", "23:30"].map(
+                (t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                )
+              )}
             </select>
 
             <input
               type="date"
-              value={state.date}
-              onChange={(e) => setState((prev) => ({ ...prev, date: e.target.value }))}
-              className="w-full px-4 py-2 border-2 border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
+              min="2025-03-01"
+              max="2025-03-31"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-3 border-2 border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-300"
             />
 
             <button
               onClick={createTicket}
-              className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-2 rounded-md shadow-lg hover:bg-gradient-to-l transition duration-300"
+              className="w-full bg-gradient-to-r from-red-600 to-pink-600 text-white py-3 rounded-lg shadow-lg hover:bg-gradient-to-r hover:from-pink-600 hover:to-red-600 transition"
             >
               Ticket Yaratish
             </button>
@@ -226,11 +229,11 @@ const AdminPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4 max-w-7xl mx-auto mt-8">
-        {state.tickets.map((ticket: Ticket) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4 w-[1518.9] mx-auto">
+        {tickets.map((ticket: any) => (
           <div
             key={ticket.id}
-            className="bg-red-400 text-white rounded-2xl shadow-xl p-6 transform transition duration-300 hover:scale-105"
+            className="bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-2xl shadow-xl p-6 transform transition duration-300 hover:scale-105"
           >
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">
@@ -241,25 +244,21 @@ const AdminPage: React.FC = () => {
               </span>
             </div>
             <div className="flex justify-between items-center mb-4">
-              <p className="text-lg">
-                Puli: <span className="font-bold">{ticket.price} som</span>
-              </p>
-              <p className="text-lg">
-                Count: <span className="font-bold">{ticket.count}</span>
-              </p>
+              <p>Chipta Narxi: {ticket.price} so'm</p>
+              <p>Chipta Soni: {ticket.count}</p>
             </div>
-            <div className="border-t border-gray-500 pt-4">
+            <div className="flex justify-between items-center">
               <button
                 onClick={() => editTicket(ticket)}
-                className="w-full bg-gradient-to-r from-white to-black text-white py-2 rounded-md hover:bg-gradient-to-l transition duration-300"
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 px-4 py-2 text-white rounded-md shadow-lg hover:bg-gradient-to-r hover:from-yellow-600 hover:to-yellow-500 transition duration-300"
               >
-                Edit
+                Tahrirlash
               </button>
               <button
                 onClick={() => deleteTicket(ticket.id)}
-                className="w-full bg-gradient-to-r from-white to-black text-white py-2 rounded-md mt-2 hover:bg-gradient-to-l transition duration-300"
+                className="bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-white rounded-md shadow-lg hover:bg-gradient-to-r hover:from-red-600 hover:to-red-500 transition duration-300"
               >
-                Delete
+                O'chirish
               </button>
             </div>
           </div>
